@@ -1,0 +1,117 @@
+---
+title: "CO2 emissions -r -research"
+format: pdf
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+#Importing data from Csv the eission data
+library(readr)
+emission_data <- read_csv("C:/Users/knr/Desktop/R Bootcamp/Bootcamp-resource/Bootcamp-resource/Nomvume_resource/data/emission_data.csv")
+View(emission_data)
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#converting emission from tonnes to kilo tonnes(1000 tons = 1kilo tonnes)
+library(dplyr)
+emission_data |> 
+  mutate(
+   kilo_emission =emission/1000)
+
+```
+
+```{r}
+#Exploratory data analysis for emission_data
+#head(data) represents the top 6 rows of the emission_data quick snapshot
+head(emission_data)
+#tail(data) represents the bottom 6 rows of the emission data quick snapshot
+tail(emission_data)
+#summary provides overview of the data , five number summary(min,max,1st qartile , 3rd quartile , Range) 
+summary(emission_data)
+#provides a summary of the data frame’s columns
+str(emission_data)
+
+
+```
+
+```{r}
+#Visualisation
+install.packages("dplyr")
+library(dplyr)
+# Total emissions of countries to plot (group the countries and sum up)
+total_emissions <- emission_data|>
+  group_by(code) |>
+  summarize(total_emission = sum(emission, na.rm = TRUE))
+print(total_emissions)
+```
+
+```{r}
+#maximum and minimum of the total emission to only map them in a graph 
+top_20_emissions <- total_emissions |>
+  slice_max(order_by = total_emissions, n = 20)
+
+Bottom_20_emission <- total_emissions |>
+  slice_min(order_by = total_emissions, n = 20)
+
+print(top_20_emissions)
+print(Bottom_20_emission)
+```
+
+```{r}
+#showing the top 20 emissions per country
+ggplot(top_20_emissions, aes(x = reorder(code, total_emission), y = total_emission)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    x = "Country Code",
+    y = "Total Emission",
+    title = "Top 20 Total Emissions per Country"
+  ) +
+  theme_light() 
+```
+
+```{r}
+#Bottom emissions
+ggplot(Bottom_20_emission, aes(x = reorder(code, total_emission), y = total_emission)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(
+    x = "Country Code",
+    y = "Total Emission",
+    title = "Bottom  20 Total Emissions per Country"
+  ) +
+  theme_light() 
+
+
+```
+
+```{r}
+# Total emissions per product
+product_emissions <- emission_data|>
+  group_by(products) |>
+  summarize(total_emission = sum(emission, na.rm = TRUE))
+print(product_emissions)
+
+```
+
+```{r}
+# Sum of product contribution
+ggplot(product_emissions, aes(x = products, y = total_emission, fill = products)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Total Emissions by Product",
+    x = " By Product",
+    y = "Total Emissions",
+    fill = "Product"
+  ) +
+  theme_classic()
+```
