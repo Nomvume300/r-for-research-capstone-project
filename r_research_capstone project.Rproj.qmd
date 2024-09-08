@@ -1,0 +1,134 @@
+---
+title: "r_research_capstone"
+author: "Nomvume"
+format: pdf
+editor: visual
+---
+
+## CO2 Emission from Cereal Food Production
+
+**Introduction**
+
+The aim of the project is to compare the total amount of emissions produced by countries and the product contribution due to converting from Forest to agriculture land. The data extracted from Ritchie(2021), gives an overview of countries emission , agriculture land use which are rice , wheat and other cereals. Lastly the deforestation emission per capita. Various statistical analysis will be performed to show variation and impact and trends of the deforestation to CO2 emissions. The data comprises of countries (entity and code ) , amount of emissions by products (emissions and per capital emission).
+
+![Figure1: Indian Rice farm](Rice Farm.jpeg){alt="Figure1: Indian Rice farm" fig-align="center"}
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2) 
+library(skimr) 
+```
+
+```{r}
+ emission_data <- read_csv("C:/Users/knr/Desktop/R Bootcamp/Bootcamp-resource/Bootcamp-resource/Nomvume_resource/data/emission_data.csv") 
+View(emission_data)
+```
+
+```{r}
+library(tinytex) 
+```
+
+```{r}
+emission_data |> mutate( kilo_emission =emission/1000)
+```
+
+**Explanatory data analysis**
+
+In the following analysis it will give an overview of the data , what data comprises of . To view the top and last rows of the data which is a quick snapshot. Summary provides 5 number summary min, max,mean ,median and quartiles.
+
+```{r}
+head(emission_data)
+```
+
+```{r}
+tail(emission_data)
+```
+
+```{r}
+str(emission_data)
+```
+
+To compare the emissions regardless of the product factor comparing the minimum and maximum , the max is 47 times more than the min which shows variation of the emissions produced.
+
+```{r}
+summary(emission_data)
+```
+
+```{r}
+skim(emission_data)
+```
+
+**Visualization**
+
+The analysis will allow a visualization of countries with the highest amount of the emissions will only show the most 10 countries with highest emissions and the countries with lowest emission. Lastly a summary of products contributing to the emissions.
+
+```{r}
+total_emissions <- emission_data|>  
+  group_by(code) |>  
+  summarize(total_emission = sum(emission, na.rm = TRUE))
+print(total_emissions)
+```
+
+```{r}
+top_20_emissions <- total_emissions |>  
+  slice_max(order_by = total_emissions, n = 20)
+print(top_20_emissions)
+```
+
+```{r}
+Bottom_20_emission <- total_emissions |> 
+  slice_min(order_by = total_emissions, n = 20)
+print(Bottom_20_emission)
+```
+
+The results shows America followed by Mexico and Japan in emission production regardless of the product they emit with have highest production of emissions. In the bottom 20 with the least amount of emission is Cyprus, Estonia and Croatia respectively. With the Rice conversion contributing the most to the emissions.
+
+```{r}
+ggplot(top_20_emissions, aes(x = reorder(code, total_emission), y = total_emission)) +   geom_bar(stat = "identity", fill = "steelblue") +   labs(     x = "Country Code",     y = "Total Emission",     title = "Top 20 Total Emissions per Country"   ) +   theme_light() 
+```
+
+```{r}
+ggplot(Bottom_20_emission, aes(x = reorder(code, total_emission), y = total_emission)) +   geom_bar(stat = "identity", fill = "red") +   labs(     x = "Country Code",     y = "Total Emission",     title = "Bottom  20 Total Emissions per Country"   ) +   theme_light() 
+```
+
+```{r}
+product_emissions <- emission_data|>  
+  group_by(products) |>   summarize(total_emission = sum(emission, na.rm = TRUE)) 
+print(product_emissions)
+```
+
+```{r}
+ggplot(product_emissions, aes(x = products, y = total_emission, fill = products)) +   geom_bar(stat = "identity") +   labs(     title = "Total Emissions by Product",     x = " By Product",     y = "Total Emissions",     fill = "Product"   ) +   theme_classic()
+```
+
+**Inferential Statistical analysis**
+
+The Anova analysis conducted to test difference between products and emissions.
+
+-   **Null Hypothesis (H0)**: There is no significant difference in mean emissions between product and emission produced
+
+-   **Alternative Hypothesis (H1)**: There is a significant difference in mean emissions between product and emission produced.
+
+```{r}
+anova_result <- aov(emission ~ products, data = emission_data) 
+print(summary(anova_result))
+```
+
+**F-value**: The F-value of 2.115 is the ratio of the variance between the groups (products) to the variance within the groups (residuals).
+
+**p-value**: The p-value of 0.125 is greater than the commonly used significance level of 0.05. This suggests that the observed differences among group means are not statistically significant.
+
+Since the p-value (0.125) is greater than 0.05 we **fail to reject the null hypothesis**,this mean emissions do not differ significantly between the products.
+
+```{r}
+ggplot(emission_data, aes(x = products, y = emission, fill = products)) +   geom_boxplot() +   theme_minimal() +   labs(title = "Emissions by Product", x = "Product", y = "Emission")
+```
+
+```{r}
+emission_data |> ggplot(aes(products, emission)) + geom_point() + geom_smooth( se = FALSE, method = "lm" ) + ggtitle("Product vs Emission") + theme_bw()
+```
+
+**Conclusion**
+
+The amount of emission are influenced by the products individually the is no link in terms of products. Each products have its own contribution to the emission in general. Also the increase in per_capita_emission is the contribution of the deforestation.
