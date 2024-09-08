@@ -1,43 +1,53 @@
 ---
-title: "CO2 emissions -r -research"
+title: "Emission from Cereal Food Production"
+author: Nomvume Sandi
 format: pdf
 editor: visual
 ---
 
-## Quarto
+## Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+You should write actual content to introduce the topic and the data.
 
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+Instead of importing individual packages, a better option would be to import the tidyverse package once. 
 
 ```{r}
-#Importing data from Csv the eission data
-library(readr)
-emission_data <- read_csv("C:/Users/knr/Desktop/R Bootcamp/Bootcamp-resource/Bootcamp-resource/Nomvume_resource/data/emission_data.csv")
-View(emission_data)
+#Importing data from Csv the emission data
+library(tidyverse)
+emission_data <- read_csv("https://raw.githubusercontent.com/xrander/bootcamp-test/master/data/emission_data.csv")
 
+emission_data
 ```
 
-You can add options to executable code like this
+
 
 ```{r}
 #converting emission from tonnes to kilo tonnes(1000 tons = 1kilo tonnes)
-library(dplyr)
 emission_data |> 
   mutate(
    kilo_emission =emission/1000)
 
 ```
 
+# Exploratory data analysis for emission_data
 ```{r}
-#Exploratory data analysis for emission_data
 #head(data) represents the top 6 rows of the emission_data quick snapshot
 head(emission_data)
+```
+
+You do not need to explain what the functions are for. Instead, explain the results
+```{r}
 #tail(data) represents the bottom 6 rows of the emission data quick snapshot
 tail(emission_data)
-#summary provides overview of the data , five number summary(min,max,1st qartile , 3rd quartile , Range) 
+```
+
+
+```{r}
+#summary provides overview of the data , five number summary(min,max,1st qartile , 3rd quartile , Range)
+```
+
+
+```{r}
 summary(emission_data)
 #provides a summary of the data frame’s columns
 str(emission_data)
@@ -45,31 +55,42 @@ str(emission_data)
 
 ```
 
+# Visualisation
+
+## Total emissions of countries to plot (group the countries and sum up)
 ```{r}
-#Visualisation
-install.packages("dplyr")
-library(dplyr)
-# Total emissions of countries to plot (group the countries and sum up)
+
 total_emissions <- emission_data|>
   group_by(code) |>
   summarize(total_emission = sum(emission, na.rm = TRUE))
 print(total_emissions)
 ```
 
+
+maximum and minimum of the total emission to only map them in a graph 
+
 ```{r}
-#maximum and minimum of the total emission to only map them in a graph 
+
 top_20_emissions <- total_emissions |>
   slice_max(order_by = total_emissions, n = 20)
+```
 
+
+```{r}
 Bottom_20_emission <- total_emissions |>
   slice_min(order_by = total_emissions, n = 20)
+```
 
+
+```{r}
 print(top_20_emissions)
 print(Bottom_20_emission)
 ```
 
+showing the top 20 emissions per country
+
+
 ```{r}
-#showing the top 20 emissions per country
 ggplot(top_20_emissions, aes(x = reorder(code, total_emission), y = total_emission)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   labs(
@@ -77,11 +98,16 @@ ggplot(top_20_emissions, aes(x = reorder(code, total_emission), y = total_emissi
     y = "Total Emission",
     title = "Top 20 Total Emissions per Country"
   ) +
-  theme_light() 
+  theme_light() +
+  coord_flip()
 ```
 
+
+Bottom emissions
+
+
 ```{r}
-#Bottom emissions
+
 ggplot(Bottom_20_emission, aes(x = reorder(code, total_emission), y = total_emission)) +
   geom_bar(stat = "identity", fill = "red") +
   labs(
@@ -89,13 +115,15 @@ ggplot(Bottom_20_emission, aes(x = reorder(code, total_emission), y = total_emis
     y = "Total Emission",
     title = "Bottom  20 Total Emissions per Country"
   ) +
-  theme_light() 
-
-
+  theme_light() +
+  coord_flip()
 ```
 
+Total emissions per product
+
+
 ```{r}
-# Total emissions per product
+
 product_emissions <- emission_data|>
   group_by(products) |>
   summarize(total_emission = sum(emission, na.rm = TRUE))
@@ -103,8 +131,11 @@ print(product_emissions)
 
 ```
 
+Sum of product contribution
+
+
 ```{r}
-# Sum of product contribution
+
 ggplot(product_emissions, aes(x = products, y = total_emission, fill = products)) +
   geom_bar(stat = "identity") +
   labs(
